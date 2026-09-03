@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\BlogPost;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -10,7 +11,7 @@ use Illuminate\Support\Facades\Schema;
  * A post is publicly visible only when `is_published` is true AND `published_at`
  * is in the past — that pairing lets the doctor schedule posts ahead of time.
  *
- * @see \App\Models\BlogPost
+ * @see BlogPost
  */
 return new class extends Migration
 {

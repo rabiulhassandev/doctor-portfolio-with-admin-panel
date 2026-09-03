@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Testimonial;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -7,7 +8,7 @@ use Illuminate\Support\Facades\Schema;
 /**
  * Patient feedback shown in the home-page slider.
  *
- * @see \App\Models\Testimonial
+ * @see Testimonial
  */
 return new class extends Migration
 {

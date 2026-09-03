@@ -3,9 +3,11 @@
 namespace App\Models;
 
 use App\Enums\AppointmentStatus;
+use Database\Factories\AppointmentRequestFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Carbon;
 
 /**
  * An appointment enquiry submitted from the public contact form.
@@ -16,16 +18,16 @@ use Illuminate\Database\Eloquent\Model;
  * @property string $patient_name
  * @property string|null $email
  * @property string $phone
- * @property \Illuminate\Support\Carbon $preferred_date
+ * @property Carbon $preferred_date
  * @property string $preferred_time
  * @property string|null $message
  * @property AppointmentStatus $status
  * @property string|null $admin_notes
- * @property \Illuminate\Support\Carbon|null $responded_at
+ * @property Carbon|null $responded_at
  */
 class AppointmentRequest extends Model
 {
-    /** @use HasFactory<\Database\Factories\AppointmentRequestFactory> */
+    /** @use HasFactory<AppointmentRequestFactory> */
     use HasFactory;
 
     protected $guarded = [];

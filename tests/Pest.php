@@ -14,8 +14,10 @@ use Tests\TestCase;
 |
 */
 
+// Feature tests run against a fresh in-memory SQLite database (see phpunit.xml),
+// rebuilt for each test so one test can never leak data into the next.
 pest()->extend(TestCase::class)
- // ->use(RefreshDatabase::class)
+    ->use(RefreshDatabase::class)
     ->in('Feature');
 
 /*

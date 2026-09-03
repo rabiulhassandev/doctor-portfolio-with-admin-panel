@@ -1,0 +1,309 @@
+@import '../../../../vendor/filament/filament/resources/css/theme.css';
+
+@source '../../../../app/Filament/**/*';
+@source '../../../../resources/views/filament/**/*';
+
+/*
+|--------------------------------------------------------------------------
+| Admin panel theme
+|--------------------------------------------------------------------------
+|
+| Filament ships a perfectly good default. This file takes that default and
+| makes the panel feel like the same product as the public site: the same deep
+| clinical blue, the same teal accent, the same Instrument Sans, the same
+| generous corner radii.
+|
+| Nothing here hardcodes a colour. Filament turns the `->colors()` array in
+| AdminPanelProvider into `--primary-50` … `--primary-950`, and the provider
+| injects the rest of config/site.php as `--brand-*`. So a rebrand is still a
+| one-file change in config/site.php — this stylesheet follows along.
+|
+| Dark mode is handled with `:where(.dark) &` rather than the `dark:` variant
+| so that every rule below reads as plain CSS.
+|
+*/
+
+@layer components {
+    /*
+    | Shared tokens
+    |
+    | `--brand-accent` is injected by the panel provider; the fallback keeps
+    | this stylesheet usable on its own (and in Vite's dev server before the
+    | provider has rendered anything).
+    */
+    :root {
+        --admin-accent: var(--brand-accent, #14a5a0);
+        --admin-radius: 0.875rem;
+        --admin-ring: color-mix(in oklab, var(--primary-600) 12%, transparent);
+        /* A hairline ring first, so cards keep a defined edge on a light
+           background, then two soft layers for depth. */
+        --admin-shadow:
+            0 0 0 1px color-mix(in oklab, var(--primary-950) 7%, transparent),
+            0 1px 2px color-mix(in oklab, var(--primary-950) 6%, transparent),
+            0 8px 24px -12px color-mix(in oklab, var(--primary-950) 18%, transparent);
+    }
+
+    /*
+    |----------------------------------------------------------------------
+    | Sidebar
+    |----------------------------------------------------------------------
+    |
+    | The default sidebar is white on white against the page. A faint brand
+    | wash separates it from the content without adding a hard border, and the
+    | active item gets a filled pill plus a bar in the accent colour — the one
+    | piece of the panel that tells you where you are at a glance.
+    */
+    .fi-sidebar {
+        background-color: color-mix(in oklab, var(--primary-600) 3%, white);
+    }
+
+    :where(.dark) .fi-sidebar {
+        background-color: color-mix(in oklab, var(--primary-950) 22%, #0d1117);
+    }
+
+    @media (min-width: 1024px) {
+        .fi-sidebar {
+            border-inline-end: 1px solid var(--admin-ring);
+        }
+    }
+
+    .fi-sidebar-item-btn {
+        font-weight: 500;
+    }
+
+    .fi-sidebar-item-btn:hover {
+        background-color: color-mix(in oklab, var(--primary-600) 7%, transparent);
+    }
+
+    /* The active page: filled pill, brand text, and an accent bar on the
+       leading edge that lines up across the whole navigation column. */
+    .fi-sidebar-item.fi-active > .fi-sidebar-item-btn {
+        background-color: color-mix(in oklab, var(--primary-600) 11%, transparent);
+    }
+
+    .fi-sidebar-item.fi-active > .fi-sidebar-item-btn::before {
+        content: '';
+        position: absolute;
+        inset-block: 0.375rem;
+        inset-inline-start: -0.5rem;
+        width: 3px;
+        border-radius: 9999px;
+        background-color: var(--admin-accent);
+    }
+
+    .fi-sidebar-item.fi-active > .fi-sidebar-item-btn > .fi-icon,
+    .fi-sidebar-item.fi-active > .fi-sidebar-item-btn .fi-sidebar-item-label {
+        color: var(--primary-700);
+    }
+
+    :where(.dark) .fi-sidebar-item.fi-active > .fi-sidebar-item-btn > .fi-icon,
+    :where(.dark) .fi-sidebar-item.fi-active > .fi-sidebar-item-btn .fi-sidebar-item-label {
+        color: var(--primary-300);
+    }
+
+    /* Group headings read as section labels rather than as more menu items. */
+    .fi-sidebar-group-label {
+        font-size: 0.6875rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+    }
+
+    /*
+    |----------------------------------------------------------------------
+    | Topbar
+    |----------------------------------------------------------------------
+    */
+    .fi-topbar > nav {
+        border-bottom: 1px solid var(--admin-ring);
+        background-color: color-mix(in oklab, white 88%, transparent);
+        backdrop-filter: blur(12px);
+    }
+
+    :where(.dark) .fi-topbar > nav {
+        background-color: color-mix(in oklab, #0d1117 88%, transparent);
+    }
+
+    /*
+    |----------------------------------------------------------------------
+    | Panels, cards and tables
+    |----------------------------------------------------------------------
+    |
+    | Slightly larger radii and a soft brand-tinted shadow, so a page of
+    | sections reads as a stack of cards instead of a stack of boxes.
+    */
+    .fi-section,
+    .fi-wi-table,
+    .fi-ta-ctn {
+        border-radius: var(--admin-radius);
+        box-shadow: var(--admin-shadow);
+    }
+
+    .fi-section-header-heading {
+        letter-spacing: -0.01em;
+    }
+
+    /* Table headers as quiet labels, and a brand tint on row hover so the row
+       under the cursor is obvious when scanning a long list of requests. */
+    .fi-ta-header-cell-label {
+        font-size: 0.6875rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+    }
+
+    .fi-ta-row:hover {
+        background-color: color-mix(in oklab, var(--primary-600) 4%, transparent);
+    }
+
+    :where(.dark) .fi-ta-row:hover {
+        background-color: color-mix(in oklab, var(--primary-400) 7%, transparent);
+    }
+
+    /*
+    |----------------------------------------------------------------------
+    | Dashboard stat cards
+    |----------------------------------------------------------------------
+    |
+    | The numbers the practice checks first. A rule along the top edge in the
+    | accent colour, a larger value, and a lift on hover for the cards that
+    | link somewhere.
+    */
+    .fi-wi-stats-overview-stat {
+        position: relative;
+        overflow: hidden;
+        border-radius: var(--admin-radius);
+        box-shadow: var(--admin-shadow);
+        transition:
+            transform 0.15s ease,
+            box-shadow 0.15s ease;
+    }
+
+    .fi-wi-stats-overview-stat::before {
+        content: '';
+        position: absolute;
+        inset-inline: 0;
+        top: 0;
+        height: 3px;
+        background: linear-gradient(
+            to right,
+            var(--primary-600),
+            var(--admin-accent)
+        );
+    }
+
+    a.fi-wi-stats-overview-stat:hover {
+        transform: translateY(-2px);
+        box-shadow:
+            0 0 0 1px color-mix(in oklab, var(--primary-950) 7%, transparent),
+            0 2px 4px color-mix(in oklab, var(--primary-950) 8%, transparent),
+            0 16px 32px -16px color-mix(in oklab, var(--primary-950) 28%, transparent);
+    }
+
+    .fi-wi-stats-overview-stat-value {
+        font-size: 1.875rem;
+        line-height: 2.25rem;
+        font-weight: 600;
+        letter-spacing: -0.02em;
+    }
+
+    .fi-wi-stats-overview-stat-label {
+        font-size: 0.8125rem;
+        font-weight: 500;
+    }
+
+    /*
+    |----------------------------------------------------------------------
+    | Buttons and inputs
+    |----------------------------------------------------------------------
+    */
+    .fi-btn {
+        font-weight: 600;
+        border-radius: 0.625rem;
+    }
+
+    .fi-input-wrp {
+        border-radius: 0.625rem;
+    }
+
+    /*
+    |----------------------------------------------------------------------
+    | Login screen
+    |----------------------------------------------------------------------
+    |
+    | The one page a patient-facing business might show a stranger, and by
+    | default it is a grey box on a grey field. A brand gradient behind an
+    | elevated card makes it look like part of the practice's site.
+    */
+    .fi-simple-layout {
+        background:
+            radial-gradient(
+                60rem 40rem at 15% -10%,
+                color-mix(in oklab, var(--primary-600) 16%, transparent),
+                transparent
+            ),
+            radial-gradient(
+                50rem 35rem at 85% 110%,
+                color-mix(in oklab, var(--admin-accent) 14%, transparent),
+                transparent
+            ),
+            var(--primary-50);
+    }
+
+    :where(.dark) .fi-simple-layout {
+        background:
+            radial-gradient(
+                60rem 40rem at 15% -10%,
+                color-mix(in oklab, var(--primary-500) 18%, transparent),
+                transparent
+            ),
+            radial-gradient(
+                50rem 35rem at 85% 110%,
+                color-mix(in oklab, var(--admin-accent) 12%, transparent),
+                transparent
+            ),
+            #0d1117;
+    }
+
+    .fi-simple-main {
+        border-radius: 1.25rem;
+        box-shadow:
+            0 1px 2px color-mix(in oklab, var(--primary-950) 8%, transparent),
+            0 24px 48px -24px color-mix(in oklab, var(--primary-950) 45%, transparent);
+    }
+
+    .fi-simple-header-heading {
+        letter-spacing: -0.02em;
+    }
+
+    /*
+    |----------------------------------------------------------------------
+    | Scrollbars
+    |----------------------------------------------------------------------
+    |
+    | Firefox and Chromium disagree about the property names, so both are set.
+    */
+    .fi-sidebar-nav,
+    .fi-main {
+        scrollbar-width: thin;
+        scrollbar-color: color-mix(in oklab, var(--primary-600) 30%, transparent)
+            transparent;
+    }
+
+    .fi-sidebar-nav::-webkit-scrollbar,
+    .fi-main::-webkit-scrollbar {
+        width: 0.5rem;
+        height: 0.5rem;
+    }
+
+    .fi-sidebar-nav::-webkit-scrollbar-thumb,
+    .fi-main::-webkit-scrollbar-thumb {
+        border-radius: 9999px;
+        background-color: color-mix(in oklab, var(--primary-600) 25%, transparent);
+    }
+
+    .fi-sidebar-nav::-webkit-scrollbar-thumb:hover,
+    .fi-main::-webkit-scrollbar-thumb:hover {
+        background-color: color-mix(in oklab, var(--primary-600) 45%, transparent);
+    }
+}

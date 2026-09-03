@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\GalleryImage;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -7,7 +8,7 @@ use Illuminate\Support\Facades\Schema;
 /**
  * Clinic photos shown in the lightbox grid on /gallery.
  *
- * @see \App\Models\GalleryImage
+ * @see GalleryImage
  */
 return new class extends Migration
 {

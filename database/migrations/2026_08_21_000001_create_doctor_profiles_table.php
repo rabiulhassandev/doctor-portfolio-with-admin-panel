@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\DoctorProfile;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -11,7 +12,7 @@ use Illuminate\Support\Facades\Schema;
  * contact details, opening hours and social links — lives here so the site can
  * be rebranded from the admin panel without touching a single line of code.
  *
- * @see \App\Models\DoctorProfile
+ * @see DoctorProfile
  */
 return new class extends Migration
 {
@@ -25,7 +26,11 @@ return new class extends Migration
             $table->string('specialization');             // "Consultant Cardiologist"
             $table->string('tagline')->nullable();        // Short hero strapline.
             $table->string('photo')->nullable();          // Path on the `public` disk.
-            $table->unsignedSmallInteger('years_of_experience')->default(0);
+
+            // Nullable because it is genuinely optional — a doctor who leaves the
+            // field blank should not be recorded as having zero years' experience,
+            // and the public pages hide the figure entirely when it is unset.
+            $table->unsignedSmallInteger('years_of_experience')->nullable();
 
             // --- Long-form content -------------------------------------------
             $table->text('short_bio')->nullable();        // 1–2 sentences, used on the home page.

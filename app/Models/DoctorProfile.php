@@ -15,9 +15,12 @@ use Illuminate\Support\Collection;
  *
  * @property string $name
  * @property string $specialization
+ * @property string|null $registration_label
+ * @property string|null $registration_number
+ * @property string|null $chamber_name
  * @property string|null $tagline
  * @property string|null $photo
- * @property int $years_of_experience
+ * @property int|null $years_of_experience
  * @property string|null $short_bio
  * @property string|null $bio
  * @property string|null $philosophy
@@ -40,22 +43,40 @@ use Illuminate\Support\Collection;
  */
 class DoctorProfile extends Model
 {
-    /** Weekday keys, in display order. Used by the admin form and the hours table. */
+    /** Container key under which the current profile is cached for the request. */
+    private const CONTAINER_KEY = 'doctor.profile.current';
+
+    /**
+     * Weekday keys, in display order. Used by the admin form and the hours table.
+     *
+     * Saturday first, because the working week in Bangladesh runs Saturday to
+     * Thursday with Friday as the day off — a Monday-first table asks a local
+     * reader to hunt for today. Reorder this array for another market and the
+     * admin form, the hours table and the footer all follow.
+     */
     public const DAYS = [
+        'saturday' => 'Saturday',
+        'sunday' => 'Sunday',
         'monday' => 'Monday',
         'tuesday' => 'Tuesday',
         'wednesday' => 'Wednesday',
         'thursday' => 'Thursday',
         'friday' => 'Friday',
-        'saturday' => 'Saturday',
-        'sunday' => 'Sunday',
     ];
 
     /** Mass assignment is safe here: the only writer is the admin settings page. */
     protected $guarded = [];
 
-    /** Request-scoped cache for {@see self::current()}. */
-    protected static ?self $currentInstance = null;
+    /**
+     * Saving the profile invalidates the cached copy, so the very next read
+     * picks up the new details. Registering it here rather than in the admin
+     * page means no future caller can forget to do it.
+     */
+    protected static function booted(): void
+    {
+        static::saved(fn () => static::forgetCurrent());
+        static::deleted(fn () => static::forgetCurrent());
+    }
 
     protected function casts(): array
     {
@@ -72,36 +93,50 @@ class DoctorProfile extends Model
     /**
      * The one and only profile row.
      *
+     * The result is cached in the service container for the lifetime of the
+     * request, so a page that renders the navbar, hero and footer costs one
+     * query rather than three. A container binding is used rather than a static
+     * property so the cache cannot survive into the next request — which is
+     * what would happen under Octane, or between tests.
+     *
      * If the table is empty (fresh install, before seeding) this returns an
      * unsaved model populated from config/site.php, so the public pages still
      * render instead of blowing up on null.
      */
     public static function current(): self
     {
-        return static::$currentInstance ??= static::query()->first() ?? new static([
-            'name' => config('site.name'),
-            'specialization' => config('site.specialization'),
-            'working_hours' => static::defaultWorkingHours(),
-        ]);
+        if (! app()->bound(self::CONTAINER_KEY)) {
+            app()->scoped(self::CONTAINER_KEY, fn () => static::query()->first() ?? new static([
+                'name' => config('site.name'),
+                'specialization' => config('site.specialization'),
+                'working_hours' => static::defaultWorkingHours(),
+            ]));
+        }
+
+        return app(self::CONTAINER_KEY);
     }
 
-    /** Forget the cached instance — call this after saving in the admin panel. */
+    /**
+     * Drop the cached copy so the next read hits the database.
+     *
+     * Called automatically whenever the profile is saved; see booted() above.
+     */
     public static function forgetCurrent(): void
     {
-        static::$currentInstance = null;
+        app()->forgetInstance(self::CONTAINER_KEY);
     }
 
-    /** A sensible Mon–Fri 9–5 schedule used as the form default on a fresh install. */
+    /** A sensible evening-chamber schedule used as the form default on a fresh install. */
     public static function defaultWorkingHours(): array
     {
         return collect(self::DAYS)
-            ->map(fn (string $label, string $key) => [
+            ->keys()
+            ->map(fn (string $key) => [
                 'day' => $key,
-                'opens' => '09:00',
-                'closes' => '17:00',
-                'is_closed' => in_array($key, ['saturday', 'sunday'], true),
+                'opens' => '18:00',
+                'closes' => '21:00',
+                'is_closed' => $key === 'friday',
             ])
-            ->values()
             ->all();
     }
 
@@ -128,6 +163,99 @@ class DoctorProfile extends Model
                 'is_today' => $key === $today,
             ];
         })->values();
+    }
+
+    /**
+     * Whether the clinic is open right now, and the next thing to happen.
+     *
+     * Patients arriving on the site want one answer before anything else: can I
+     * ring them now? The opening-hours table answers it eventually; this answers
+     * it at a glance, and is what the pill in the hero and the footer show.
+     *
+     *     ['is_open' => true,  'label' => 'Open now',    'detail' => 'Closes 5:00 PM']
+     *     ['is_open' => false, 'label' => 'Closed now',  'detail' => 'Opens Monday 9:00 AM']
+     *
+     * Returns null when no day of the week has hours on it — a practice that
+     * only sees patients by arrangement is better off saying nothing than
+     * announcing that it is permanently closed.
+     *
+     * @return array{is_open: bool, label: string, detail: string}|null
+     */
+    public function openStatus(): ?array
+    {
+        $rows = $this->scheduleRows()->keyBy('day');
+        $now = Carbon::now();
+
+        // A day counts as open only if it is switched on and has both times.
+        $isOpenDay = fn (array $row): bool => ! ($row['is_closed'] ?? true)
+            && filled($row['opens'] ?? null)
+            && filled($row['closes'] ?? null);
+
+        // Today first: either the clinic is open, or it opens later on.
+        $today = $rows->get(strtolower($now->format('l')), []);
+
+        if ($isOpenDay($today)) {
+            $opens = $now->copy()->setTimeFrom(Carbon::parse($today['opens']));
+            $closes = $now->copy()->setTimeFrom(Carbon::parse($today['closes']));
+
+            if ($now->between($opens, $closes)) {
+                return [
+                    'is_open' => true,
+                    'label' => 'Open now',
+                    'detail' => 'Closes '.$closes->format('g:i A'),
+                ];
+            }
+
+            if ($now->lt($opens)) {
+                return [
+                    'is_open' => false,
+                    'label' => 'Closed now',
+                    'detail' => 'Opens today at '.$opens->format('g:i A'),
+                ];
+            }
+        }
+
+        /*
+         | Otherwise walk forward for the next day that has hours on it. Six
+         | steps rather than seven: coming back round to today would mean the
+         | clinic has already shut for the day, and "opens Tuesday" reads better
+         | than "opens today" on a Tuesday evening.
+         */
+        for ($offset = 1; $offset <= 6; $offset++) {
+            $day = $now->copy()->addDays($offset);
+            $row = $rows->get(strtolower($day->format('l')), []);
+
+            if (! $isOpenDay($row)) {
+                continue;
+            }
+
+            return [
+                'is_open' => false,
+                'label' => 'Closed now',
+                'detail' => sprintf(
+                    'Opens %s at %s',
+                    $offset === 1 ? 'tomorrow' : $day->format('l'),
+                    Carbon::parse($row['opens'])->format('g:i A'),
+                ),
+            ];
+        }
+
+        return null;
+    }
+
+    /**
+     * "BMDC Reg. No. A-42817", or null when the practice does not publish one.
+     *
+     * The label is stored alongside the number rather than hard-coded, because
+     * the register a doctor is on depends entirely on where they practise.
+     */
+    public function registration(): ?string
+    {
+        if (blank($this->registration_number)) {
+            return null;
+        }
+
+        return trim(($this->registration_label ?? '').' '.$this->registration_number);
     }
 
     /** Street address on one line, e.g. "12 Harley St, London, NW1 4LT, UK". */

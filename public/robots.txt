@@ -1,2 +1,9 @@
 User-agent: *
-Disallow:
+Allow: /
+
+# The admin panel should never appear in search results.
+Disallow: /admin
+
+# Replace this with the full address once the site is live, e.g.
+# Sitemap: https://your-clinic.com/sitemap.xml
+Sitemap: /sitemap.xml

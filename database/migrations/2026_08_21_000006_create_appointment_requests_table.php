@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\AppointmentRequest;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -11,7 +12,7 @@ use Illuminate\Support\Facades\Schema;
  * states a preferred date/time and the practice confirms or rejects it by hand.
  * (Live availability + payments belong to the Pro tier.)
  *
- * @see \App\Models\AppointmentRequest
+ * @see AppointmentRequest
  */
 return new class extends Migration
 {

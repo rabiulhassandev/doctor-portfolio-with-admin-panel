@@ -38,10 +38,27 @@ return [
             'report' => false,
         ],
 
+        /*
+         | Uploads made from the admin panel.
+         |
+         | `url` is deliberately root-relative. Building it from APP_URL means
+         | every uploaded image is addressed on whatever host that variable
+         | happens to name, so the moment the site is reached on a different one
+         | — a Laragon/Valet .test domain, a staging URL, a LAN IP — the images
+         | point at the wrong origin. On the public pages that shows up as
+         | broken pictures; inside Filament it is worse, because the file-upload
+         | field fetches the image to build its preview and a cross-origin fetch
+         | that never resolves leaves the field spinning forever with no editor.
+         |
+         | A leading slash sidesteps all of that: the browser resolves it
+         | against the page it is already on. Set APP_STORAGE_URL to an absolute
+         | address only when the files really are served from somewhere else,
+         | such as a CDN in front of the storage directory.
+         */
         'public' => [
             'driver' => 'local',
             'root' => storage_path('app/public'),
-            'url' => rtrim(env('APP_URL', 'http://localhost'), '/').'/storage',
+            'url' => rtrim(env('APP_STORAGE_URL', '/storage'), '/'),
             'visibility' => 'public',
             'throw' => false,
             'report' => false,

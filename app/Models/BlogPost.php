@@ -2,9 +2,11 @@
 
 namespace App\Models;
 
+use Database\Factories\BlogPostFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
 
 /**
@@ -20,13 +22,13 @@ use Illuminate\Support\Str;
  * @property string|null $excerpt
  * @property string $content
  * @property bool $is_published
- * @property \Illuminate\Support\Carbon|null $published_at
+ * @property Carbon|null $published_at
  * @property string|null $meta_title
  * @property string|null $meta_description
  */
 class BlogPost extends Model
 {
-    /** @use HasFactory<\Database\Factories\BlogPostFactory> */
+    /** @use HasFactory<BlogPostFactory> */
     use HasFactory;
 
     protected $guarded = [];

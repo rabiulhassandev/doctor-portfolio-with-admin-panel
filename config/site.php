@@ -32,7 +32,7 @@ return [
     |
     */
 
-    'name' => env('APP_NAME', 'Dr. Amelia Hart'),
+    'name' => env('APP_NAME', 'Dr. Nafis Ahmed Chowdhury'),
 
     'specialization' => 'Consultant Cardiologist',
 
@@ -48,20 +48,46 @@ return [
     | Colour palette
     |--------------------------------------------------------------------------
     |
-    | A calm, clinical blue/teal scheme. `primary` is used for buttons, links
-    | and headings; `accent` for highlights and icon backgrounds. Swap these two
-    | hex codes and the entire public site follows.
+    | A calm, clinical blue/teal scheme on warm paper. `primary` carries buttons
+    | and links; `accent` is used sparingly, for the things that should catch the
+    | eye and nothing else. Swap the hex codes and the whole public site follows.
+    |
+    | The site is built on *paper*, not on white. A page of pure #ffffff panels
+    | separated by pale blue bands is the look of a template; a warm near-white
+    | with hairline rules is the look of a printed brochure, and that is the
+    | difference the palette below is chasing.
     |
     */
 
     'colors' => [
-        'primary' => '#0f5c86',        // Deep clinical blue — buttons, links, headings.
+        'primary' => '#0f5c86',        // Deep clinical blue — buttons, links.
         'primary_dark' => '#0a4363',   // Hover state for primary.
-        'primary_light' => '#e6f2f8',  // Tinted section backgrounds.
-        'accent' => '#14a5a0',         // Teal — icon chips, underlines, highlights.
+        'primary_light' => '#e6f2f8',  // Tinted panels, used sparingly.
+        'accent' => '#14a5a0',         // Teal — the one colour that draws the eye.
         'accent_light' => '#e4f6f5',   // Tinted accent background.
-        'ink' => '#132430',            // Body copy.
-        'muted' => '#5b7183',          // Secondary copy.
+        'ink' => '#16242e',            // Body copy.
+        'muted' => '#61727e',          // Secondary copy.
+
+        /*
+         | Surfaces. `paper` is the page itself and `paper_shade` is the
+         | alternating band — the two are close enough that the change reads as
+         | a fold in the page rather than as a coloured stripe.
+         */
+        'paper' => '#fbfaf8',          // Page background.
+        'paper_shade' => '#f4f2ee',    // Alternating sections.
+        'surface' => '#ffffff',        // Cards sitting on the paper.
+
+        /*
+         | Hairlines. Borders are the detail that most gives a template away:
+         | a 1px mid-blue outline around every card reads as a wireframe. These
+         | two are barely-there warm greys, dark enough to describe an edge and
+         | light enough to stay out of the way.
+         */
+        'line' => '#e4e0d9',           // Default hairline.
+        'line_strong' => '#cfc9bf',    // Hover and emphasis.
+
+        'ink_deep' => '#101c24',       // The footer, and anything inverted.
+        'gold' => '#b08d57',           // Star ratings. Brass, not highlighter.
     ],
 
     /*
@@ -74,13 +100,13 @@ return [
     |
     */
 
-    'meta_description' => 'Compassionate, evidence-based care from an experienced consultant. '
-        .'Book an appointment online or visit the clinic.',
+    'meta_description' => 'Consultant cardiologist in Dhaka. Echocardiography, ECG and blood pressure care. '
+        .'Take a serial by phone or request an appointment online.',
 
     /*
      | Pre-filled text for the floating WhatsApp button.
      */
-    'whatsapp_message' => 'Hello, I would like to ask about an appointment.',
+    'whatsapp_message' => 'Assalamu alaikum. I would like to take a serial for the chamber.',
 
     /*
     |--------------------------------------------------------------------------

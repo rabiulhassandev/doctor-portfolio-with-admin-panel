@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Database\Factories\GalleryImageFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -17,7 +18,7 @@ use Illuminate\Database\Eloquent\Model;
  */
 class GalleryImage extends Model
 {
-    /** @use HasFactory<\Database\Factories\GalleryImageFactory> */
+    /** @use HasFactory<GalleryImageFactory> */
     use HasFactory;
 
     protected $guarded = [];
